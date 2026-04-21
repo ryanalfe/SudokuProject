@@ -1,0 +1,12 @@
+class Cell:
+    def __init__(self, value, row, col, screen):
+        self.value = value
+        self.row = row
+        self.col = col
+        self.screen = screen
+        self.sketched_value = 0
+        self.selected = False
+
+    def draw(self):
+        # draw number and outline
+        pass
