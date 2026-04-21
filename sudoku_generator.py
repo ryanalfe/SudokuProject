@@ -84,6 +84,7 @@ class SudokuGenerator:
     def fill_values(self):
         self.fill_diagonal()
         self.fill_remaining(0, self.box_length)
+        self.solution = [row[:] for row in self.board]
 
     def remove_cells(self):
         removed = 0
