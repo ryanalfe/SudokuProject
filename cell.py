@@ -38,12 +38,12 @@ class Cell:
             self.screen.blit(text, (x + 5, y + 5))
 
         # draw selection border
-        if self.selected:
+        else:
             pygame.draw.rect(
                 self.screen,
-                (255, 0, 0),
-                (x, y, self.cell_size, self.cell_size), 3)
-        else:
-            pygrame.draw.rect(self.screen, (0,0,0), (x,y, self.cell_size, self.cell_size, 1)
+                (0, 0, 0),
+                (x, y, self.cell_size, self.cell_size),
+                1
+            )
     def toggle_selected(self):
         self.selected = not self.selected
