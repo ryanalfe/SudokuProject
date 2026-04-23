@@ -1,6 +1,6 @@
 import pygame
 from cell import Cell
-from sudoku_generator import SudokuGenerator
+from sudoku_generator import generate_sudoku
 class Board:
     def __init__(self, width, height, screen, difficulty):
         self.rows = 9
@@ -10,10 +10,9 @@ class Board:
         self.screen = screen
         self.difficulty = difficulty
         self.cell_size = width // 9
-        self.cells = [[Cell(0, i, j, screen) for j in range(self.cols)] for i in range(self.rows)]
+        self.cells = [[Cell(0, i, j, screen, False, self.cell_size) for j in range(self.cols)] for i in range(self.rows)]
         self.selected_cell = None
         self.board = None
-        self.sudoku = None
         self.final_sudoku = None
         self.initial_sudoku = None
         self.generate_board()
@@ -26,18 +25,17 @@ class Board:
             removed = 40
         else:
             removed = 50
-        self.sudoku = SudokuGenerator(9, removed)
-        self.sudoku.fill_values()
-        self.final_sudoku = [row[:] for row in self.sudoku.board]
-        self.sudoku.remove_cells()
-        self.board = self.sudoku.get_board()
-        self.initial_sudoku = [row[:] for row in self.board]
+
+        puzzle_board, solution_board = generate_sudoku(9, removed)
+        self.board = [row[:] for row in puzzle_board]
+        self.final_sudoku = [row[:] for row in solution_board]
+        self.initial_sudoku = [row[:] for row in puzzle_board]
+
         for i in range(self.rows):
             for j in range(self.cols):
                 value = self.board[i][j]
                 is_original = value != 0
-
-                self.cells[i][j] = Cell(value, i, j, self.screen, is_original)
+                self.cells[i][j] = Cell(value, i, j, self.screen, is_original, self.cell_size)
     def draw(self):
         for i in range(10):
             thickness = 4 if i % 3 == 0 else 1
@@ -65,30 +63,40 @@ class Board:
         if x < self.width and y < self.height:
             row = y // self.cell_size
             col = x // self.cell_size
+            self.select(row,col)
             return (row, col)
         return None
     def clear(self):
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.initial_sudoku[row][col] == 0:
-                self.cells[row][col].set_cell_value(0)
-                self.cells[row][col].set_sketched_value(0)
+        if self.selected_cell is None:
+            return
+        row, col = self.selected_cell
+        if self.initial_sudoku[row][col] == 0:
+            self.cells[row][col].set_cell_value(0)
+            self.cells[row][col].set_sketched_value(0)
+
     def sketch(self, value):
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.cells[row][col].value == 0:
-                self.cells[row][col].set_sketched_value(value)
+        if self.selected_cell is None:
+            return
+        row, col = self.selected_cell
+        if self.initial_sudoku[row][col] == 0 and self.cells[row][col].value == 0:
+            self.cells[row][col].set_sketched_value(value)
+
     def place_number(self, value):
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.initial_sudoku[row][col] == 0:
-                self.cells[row][col].set_cell_value(value)
-                self.cells[row][col].set_sketched_value(0)
+        if self.selected_cell is None:
+            return
+        row, col = self.selected_cell
+        if self.initial_sudoku[row][col] == 0:
+            self.cells[row][col].set_cell_value(value)
+            self.cells[row][col].set_sketched_value(0)
+
     def reset_to_original(self):
         for i in range(self.rows):
             for j in range(self.cols):
                 self.cells[i][j].set_cell_value(self.initial_sudoku[i][j])
                 self.cells[i][j].set_sketched_value(0)
+                self.cells[i][j].selected = False
+        self.selected_cell = None
+
     def is_full(self):
         for row in self.cells:
             for cell in row:
