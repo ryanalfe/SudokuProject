@@ -2,7 +2,7 @@ import pygame
 
 
 class Cell:
-    def __init__(self, value, row, col, screen, is_original=False):
+    def __init__(self, value, row, col, screen, is_original=False, cell_size=60):
         self.value = value
         self.row = row
         self.col = col
@@ -10,7 +10,7 @@ class Cell:
         self.sketched_value = 0
         self.selected = False
         self.is_original = is_original
-        self.cell_size = 60
+        self.cell_size = cell_size
 
     def set_cell_value(self, value):
         self.value = value
@@ -27,7 +27,7 @@ class Cell:
 
         # draw final number
         if self.value != 0:
-            color = (0, 0, 0) if self.is_original else (120, 120, 120)
+            color = (0, 0, 0) if self.is_original else (100, 100, 100)
             text = font.render(str(self.value), True, color)
             text_rect = text.get_rect(center=(x + self.cell_size // 2, y + self.cell_size // 2))
             self.screen.blit(text, text_rect)
